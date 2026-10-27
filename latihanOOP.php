@@ -1,87 +1,92 @@
 <?php
-class Mahasiswa {
-    public string $nama;
-    public string $nim;
-    private float $nilai = 0;
+class Buku {
+    private string $judul;
+    private int $stok;
+
+    public function __construct(string $judul, int $stok) {
+        $this->judul = $judul;
+        $this->stok = $stok;
+    }
+
+    public function getJudul(): string {
+        return $this->judul;
+    }
+
+    public function getStok(): int {
+        return $this->stok;
+    }
+
+    public function kurangiStok(): bool {
+        if ($this->stok > 0) {
+            $this->stok--;
+            return true;
+        }
+        return false;
+    }
+}
+
+class Pengunjung {
+    private string $nama;
+    private string $nim;
 
     public function __construct(string $nama, string $nim) {
         $this->nama = $nama;
         $this->nim = $nim;
     }
 
-    public function setNilai(float $nilai): bool {
-        if ($nilai >= 0 && $nilai <= 100) {
-            $this->nilai = $nilai;
-            return true;
-        }
-        return false;
+    public function getNama(): string {
+        return $this->nama;
     }
 
-    public function getNilai(): float {
-        return $this->nilai;
+    public function getNim(): string {
+        return $this->nim;
+    }
+}
+
+class PenjagaPerpustakaan {
+    private string $namaPenjaga;
+
+    public function __construct(string $namaPenjaga) {
+        $this->namaPenjaga = $namaPenjaga;
     }
 
-    public function getPredikat(): string {
-        if ($this->nilai >= 85) {
-            return 'A';
-        } elseif ($this->nilai >= 70) {
-            return 'B';
-        } elseif ($this->nilai >= 55) {
-            return 'C';
+    public function prosesPeminjaman(Pengunjung $pengunjung, Buku $buku): void {
+        echo "Petugas: {$this->namaPenjaga}<br>";
+        echo "Mencari buku: '{$buku->getJudul()}'...<br>";
+
+        if ($buku->kurangiStok()) {
+            // Menggunakan format Hari dan Tanggal (l, d-m-Y)
+            $tglPinjam = date('l, d-m-Y');
+            $tglKembali = date('l, d-m-Y', strtotime('+7 days'));
+            $status = "Sudah dikembalikan";
+
+            echo "STATUS: PEMINJAMAN BERHASIL<br><br>";
+            echo "Nama Peminjam     : " . $pengunjung->getNama() . "<br>";
+            echo "NIM Peminjam      : " . $pengunjung->getNim() . "<br>";
+            echo "Nama Buku         : " . $buku->getJudul() . "<br>";
+            echo "Tanggal Pinjam    : " . $tglPinjam . "<br>";
+            echo "Tanggal Kembali   : " . $tglKembali . "<br>";
+            echo "Status Peminjaman : " . $status . "<br>";
         } else {
-            return 'D';
+            echo "STATUS: PEMINJAMAN GAGAL<br><br>";
+            echo "Maaf, buku '" . $buku->getJudul() . "' tidak tersedia (Stok Habis).<br>";
         }
+        echo "-----<br><br>";
     }
 }
 
-// Implementasi Valid
-echo "==Uji Coba Valid==\n\n";
-$mhs1 = new Mahasiswa("Budi Santoso", "2200101");
-echo "Mahasiswa: {$mhs1->nama} ({$mhs1->nim})\n";
+// Implementasi
+$petugas = new PenjagaPerpustakaan("Pak Made");
+$parama = new Pengunjung("Gede Parama Arya Satya", "250030622");
 
-$inputNilai = 88;
+// Jika Buku Tersedia
+echo "-- Jika Buku Ada --<br>";
+$bukuAda = new Buku("Secrets of the Dragon", 1);
+$petugas->prosesPeminjaman($parama, $bukuAda);
 
-if ($mhs1->setNilai($inputNilai)) {
-    echo "Set Nilai ($inputNilai): Berhasil\n";
-    echo "Nilai Akhir: " . $mhs1->getNilai() . "\n";
-    echo "Predikat   : " . $mhs1->getPredikat() . "\n";
-} else {
-    echo "Set Nilai ($inputNilai): Gagal (Nilai di luar jangkauan 0 - 100)\n";
-}
-
-echo "\n-----------------------------------\n\n";
-
-// Implementasi Tidak Valid Nilai Lebih
-echo "==Uji Coba Tidak Valid Nilai Lebih==\n\n";
-$mhs2 = new Mahasiswa("Siti Rahma", "2200102");
-echo "Mahasiswa: {$mhs2->nama} ({$mhs2->nim})\n";
-
-$inputNilaiInvalid = 120;
-
-if ($mhs2->setNilai($inputNilaiInvalid)) {
-    echo "Set Nilai ($inputNilaiInvalid): Berhasil\n";
-    echo "Nilai Akhir: " . $mhs2->getNilai() . "\n";
-    echo "Predikat   : " . $mhs2->getPredikat() . "\n";
-} else {
-    echo "Set Nilai ($inputNilaiInvalid): Gagal (Nilai harus di antara 0 - 100)\n";
-    echo "Nilai Default: " . $mhs2->getNilai() . "\n";
-    echo "Predikat     : " . $mhs2->getPredikat() . "\n";
-}
-
-echo "\n-----------------------------------\n\n";
-
-// Implementasi Tidak Valid Nilai Minus
-echo "==Uji Coba Tidak Valid Nilai Minus==\n\n";
-// 3. Uji Coba Nilai Tidak Valid (Negatif)
-$mhs3 = new Mahasiswa("Andi Pratama", "2200103");
-echo "Mahasiswa: {$mhs3->nama} ({$mhs3->nim})\n";
-
-$inputNilaiNegatif = -15;
-
-if ($mhs3->setNilai($inputNilaiNegatif)) {
-    echo "Set Nilai ($inputNilaiNegatif): Berhasil\n";
-} else {
-    echo "Set Nilai ($inputNilaiNegatif): Gagal (Nilai harus di antara 0 - 100)\n";
-}
+// Jika Buku Tidak Tersedia
+echo "-- Jika Buku Tidak Ada --<br>";
+$bukuHabis = new Buku("Secrets of the Dragon", 0);
+$petugas->prosesPeminjaman($parama, $bukuHabis);
 
 ?>
